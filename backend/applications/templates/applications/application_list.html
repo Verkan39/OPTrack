@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Applications</title>
+</head>
+<body>
+    <h1>My Applications</h1>
+
+    <a href="{% url 'application_create' %}">Add New Application</a>
+
+    <hr>
+
+    {% if applications %}
+        <table border="1" cellpadding="8">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Platform</th>
+                    <th>Status</th>
+                    <th>Applied Date</th>
+                    <th>Follow Up</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for application in applications %}
+                    <tr>
+                        <td>{{ application.company_name }}</td>
+                        <td>{{ application.role }}</td>
+                        <td>{{ application.get_platform_display }}</td>
+                        <td>{{ application.get_status_display }}</td>
+                        <td>{{ application.applied_date|default:"-" }}</td>
+                        <td>{{ application.next_follow_up|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'application_update' application.pk %}">Edit</a>
+                            |
+                            <a href="{% url 'application_delete' application.pk %}">Delete</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No applications added yet.</p>
+    {% endif %}
+</body>
+</html>
