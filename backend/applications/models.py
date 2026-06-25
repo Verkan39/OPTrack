@@ -24,7 +24,9 @@ class Applications(models.Model):
     user=models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        related_name="applications"
+        related_name="applications",
+        null=True,
+        blank=True,
     )
     
     company_name=models.CharField(max_length=100)

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 from .serializers import ApplicationSerializer
 from .forms import ApplicationForm
 from .models import Applications
@@ -63,5 +64,11 @@ def application_delete(request, pk):
     })
     
 class ApplicationViewSet(viewsets.ModelViewSet):
-    queryset=Applications.objects.all().order_by("-id")
-    serializer_class=ApplicationSerializer
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Applications.objects.filter(user=self.request.user).order_by("-id")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

@@ -6,5 +6,6 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Applications
         fields = "__all__"
+        read_only_fields=["id","user"]
         
 #serializers convert DJango model to JSON and viceversa
