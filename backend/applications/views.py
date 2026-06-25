@@ -9,7 +9,7 @@ from .models import Applications
 
 @login_required
 def application_list(request):
-    applications=Applications.objects.filter(user=request.user)
+    applications=Applications.objects.filter(user=request.user).order_by("-id")
     
     return render(request, "applications/application_list.html",{
         "applications":applications
