@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-
+from rest_framework import viewsets
+from .serializers import ApplicationSerializer
 from .forms import ApplicationForm
 from .models import Applications
 # Create your views here.
@@ -60,3 +61,7 @@ def application_delete(request, pk):
     return render(request, "applications/application_confirm_delete.html",{
         "application":application
     })
+    
+class ApplicationViewSet(viewsets.ModelViewSet):
+    queryset=Applications.objects.all().order_by("-id")
+    serializer_class=ApplicationSerializer
