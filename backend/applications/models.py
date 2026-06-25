@@ -14,7 +14,7 @@ class Applications(models.Model):
     
     class Status(models.TextChoices):
         SAVED="saved","Saved"
-        Applied="applied","Applied"
+        APPLIED="applied","Applied"
         ONLINE_ASSESSMENT="online_assessment","Online Assessment"
         INTERVIEW="interview","Interview"
         OFFER="offer","Offer"
