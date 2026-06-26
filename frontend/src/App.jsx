@@ -5,6 +5,7 @@ import TrackerPage from "./pages/Tracker";
 import ApplicationDetailPage from "./pages/ApplicationDetail";
 import AnalyticsPage from "./pages/Analytics";
 import SettingsPage from "./pages/Settings";
+import ProfilePage from "./pages/Profile";
 import { AppDataProvider } from "./context/AppDataContext";
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<AppLayout />}>
           <Route index element={<Dashboard />} />
+          <Route path="profile" element={<ProfilePage/>} />
           <Route path="tracker" element={<TrackerPage />} />
           <Route path="applications/:id" element={<ApplicationDetailPage />} />
           <Route path="analytics" element={<AnalyticsPage />} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 function SettingsPage() {
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
@@ -61,9 +61,12 @@ function SettingsPage() {
             </div>
           </div>
 
-          <button className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 font-mono font-bold text-white hover:bg-blue-500">
-            Edit Profile
-          </button>
+          <Link
+            to="/profile"
+            className="mt-6 block w-full rounded-xl bg-blue-600 px-4 py-3 text-center font-mono font-bold text-white hover:bg-blue-500"
+            >
+                Edit Profile
+            </Link>
         </div>
       </section>
     </div>

@@ -3,16 +3,40 @@ import { mockApplications } from "../data/mockApplications";
 
 const AppDataContext = createContext(null);
 
-const STORAGE_KEY = "trackflow_applications";
+const APPLICATIONS_STORAGE_KEY = "trackflow_applications";
+const PROFILE_STORAGE_KEY = "trackflow_profile";
+
+const defaultProfile = {
+  name: "Vedanshu",
+  headline: "Job Seeker Pro",
+  email: "vedanshu@example.com",
+  location: "IIT Roorkee",
+  targetRole: "Software Development Intern",
+  preferredPlatforms: "LinkedIn, WellFound, Internshala",
+  bio: "Tracking internship applications, referrals, interviews, and follow-ups in one place.",
+};
+
+function readLocalStorage(key, fallback) {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export function AppDataProvider({ children }) {
-  const [applications, setApplications] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : mockApplications;
-  });
+  const [applications, setApplications] = useState(() =>
+    readLocalStorage(APPLICATIONS_STORAGE_KEY, mockApplications)
+  );
+
+  const [profile, setProfile] = useState(() =>
+    readLocalStorage(PROFILE_STORAGE_KEY, defaultProfile)
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -29,8 +53,12 @@ export function AppDataProvider({ children }) {
   ]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+    localStorage.setItem(APPLICATIONS_STORAGE_KEY, JSON.stringify(applications));
   }, [applications]);
+
+  useEffect(() => {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+  }, [profile]);
 
   const filteredApplications = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -89,6 +117,20 @@ export function AppDataProvider({ children }) {
     );
   }
 
+  function updateProfile(updatedProfile) {
+    setProfile(updatedProfile);
+
+    setNotifications((prev) => [
+      {
+        id: Date.now(),
+        title: "Profile updated",
+        message: "Your TrackFlow profile was updated successfully.",
+        unread: true,
+      },
+      ...prev,
+    ]);
+  }
+
   function markNotificationsRead() {
     setNotifications((prev) =>
       prev.map((notification) => ({
@@ -107,6 +149,8 @@ export function AppDataProvider({ children }) {
     setIsAddModalOpen,
     addApplication,
     updateApplicationStatus,
+    profile,
+    updateProfile,
     notifications,
     markNotificationsRead,
   };

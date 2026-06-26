@@ -1,4 +1,5 @@
 import { Bell, History, Search, User, LogOut } from "lucide-react";
+import { Link } from "react-router"
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { useAppData } from "../context/AppDataContext";
@@ -9,13 +10,14 @@ function Topbar() {
     setSearchQuery,
     notifications,
     markNotificationsRead,
+    profile,
   } = useAppData();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const unreadCount = notifications.filter((item) => item.unread).length;
-
+  const profileInitial = profile.name?.charAt(0).toUpperCase() || "U";
   function toggleNotifications() {
     setIsNotificationsOpen((prev) => !prev);
     setIsProfileOpen(false);
@@ -74,12 +76,12 @@ function Topbar() {
             className="flex items-center gap-3 border-l border-slate-700 pl-5"
           >
             <div className="text-right">
-              <p className="text-sm font-bold text-slate-100">Alex Rivers</p>
-              <p className="text-xs text-slate-400">Job Seeker Pro</p>
+                <p className="text-sm font-bold text-slate-100">{profile.name}</p>
+                <p className="text-xs text-slate-400">{profile.headline}</p>
             </div>
 
             <div className="flex h-10 w-10 items-center justify-center rounded-full border border-blue-400 bg-slate-800 text-sm font-bold">
-              A
+              {profileInitial}
             </div>
           </button>
 
@@ -120,10 +122,14 @@ function Topbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -8, scale: 0.96 }}
               >
-                <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-slate-300 hover:bg-slate-800 hover:text-white">
-                  <User size={18} />
-                  Profile
-                </button>
+                <Link
+                to="/profile"
+                onClick={() => setIsProfileOpen(false)}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-slate-300 hover:bg-slate-800 hover:text-white"
+                >
+                    <User size={18} />
+                    Profile
+                </Link>
 
                 <button className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-red-300 hover:bg-red-500/10">
                   <LogOut size={18} />
