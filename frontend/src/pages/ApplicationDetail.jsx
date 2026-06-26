@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router";
 import StatusBadge from "../components/StatusBadge";
 import { useAppData } from "../context/AppDataContext";
+import {motion} from "motion/react";
 
 function ApplicationDetailPage() {
   const { id } = useParams();
@@ -12,13 +13,19 @@ function ApplicationDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div className="space-y-6" initial={{opacity:0, y:16}} animate={{opacity:1, y:0}}>
       <p className="font-mono text-sm text-slate-400">
-        Applications &gt;{" "}
+        <Link
+            to="/tracker"
+            className="text-slate-400 transition hover:text-blue-300 hover:underline"
+        >
+            Applications
+        </Link>{" "}
+        &gt;{" "}
         <span className="text-slate-100">
-          {application.role} at {application.company}
+            {application.role} at {application.company}
         </span>
-      </p>
+    </p>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="rounded-2xl border border-slate-700 bg-slate-900 p-8">
@@ -42,22 +49,28 @@ function ApplicationDetailPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-700 bg-blue-600 p-8">
-          <p className="font-mono text-sm uppercase tracking-[0.3em] text-blue-100">
+        <div className="rounded-2xl border border-blue-400/30 bg-gradient-to-br from-blue-600 to-blue-900 p-8 shadow-xl shadow-blue-950/40">
+        <p className="font-mono text-sm uppercase tracking-[0.3em] text-blue-100">
             Update Status
-          </p>
+        </p>
 
-          <select
+        <p className="mt-3 text-sm text-blue-100/80">
+            Move this application across your pipeline.
+        </p>
+
+        <select
             value={application.status}
-            onChange={(event) => updateApplicationStatus(application.id, event.target.value)}
-            className="mt-6 w-full rounded-lg border border-blue-300 bg-slate-800 px-4 py-3 font-bold text-white"
-            >
-                <option value="wishlist">Wishlist</option>
-                <option value="applied">Applied</option>
-                <option value="interview">Interview</option>
-                <option value="offer">Offer</option>
-                <option value="rejected">Rejected</option>
-            </select>
+            onChange={(event) =>
+            updateApplicationStatus(application.id, event.target.value)
+            }
+            className="mt-6 w-full rounded-lg border border-blue-300 bg-slate-900 px-4 py-3 font-bold text-white outline-none"
+        >
+            <option value="wishlist">Wishlist</option>
+            <option value="applied">Applied</option>
+            <option value="interview">Interview</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+        </select>
         </div>
       </section>
 
@@ -106,7 +119,7 @@ function ApplicationDetailPage() {
       <Link to="/tracker" className="inline-block text-blue-300 hover:underline">
         Back to tracker
       </Link>
-    </div>
+      </motion.div>
   );
 }
 
