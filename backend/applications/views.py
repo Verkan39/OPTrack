@@ -1,10 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework import viewsets
+from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
-from .serializers import ApplicationSerializer
+from .serializers import ApplicationSerializer, UserProfileSerializer
 from .forms import ApplicationForm
-from .models import Applications
+from .models import Applications, UserProfile
 # Create your views here.
 
 @login_required
@@ -72,3 +72,18 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        profile, _ = UserProfile.objects.get_or_create(
+            user=self.request.user,
+            defaults={
+                "name": self.request.user.get_full_name() or self.request.user.username,
+                "email": self.request.user.email,
+            },
+        )
+        return profile
