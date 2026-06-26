@@ -50,38 +50,18 @@ export function mapProfileFromApi(profile) {
 }
 
 export function mapApplicationToApi(application) {
-  const payload = {
+  return {
     company: application.company,
     role: application.role,
     platform: application.platform || "other",
     status: application.status || "wishlist",
     location: application.location || "",
     salary: application.salary || "",
+    application_link: application.applicationLink || "",
+    resume_version: application.resumeVersion || "",
+    notes: application.notes || "",
+    applied_date: application.appliedDate || null,
+    deadline: application.deadline || null,
+    next_follow_up: application.nextFollowUp || null,
   };
-
-  if (application.applicationLink) {
-    payload.application_link = application.applicationLink;
-  }
-
-  if (application.resumeVersion) {
-    payload.resume_version = application.resumeVersion;
-  }
-
-  if (application.notes) {
-    payload.notes = application.notes;
-  }
-
-  if (application.appliedDate) {
-    payload.applied_date = application.appliedDate;
-  }
-
-  if (application.deadline) {
-    payload.deadline = application.deadline;
-  }
-
-  if (application.nextFollowUp) {
-    payload.next_follow_up = application.nextFollowUp;
-  }
-
-  return payload;
 }

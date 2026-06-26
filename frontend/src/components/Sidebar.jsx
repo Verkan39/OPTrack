@@ -20,7 +20,7 @@ const navItems = [
 ];
 
 function Sidebar() {
-    const {setIsAddModalOpen} = useAppData();
+    const { openAddApplicationModal } = useAppData();
   const navClass = ({ isActive }) =>
     `flex items-center gap-3 rounded-md px-4 py-3 font-mono text-sm font-semibold tracking-wide transition ${
       isActive
@@ -52,7 +52,7 @@ function Sidebar() {
 
       <div className="mt-auto border-t border-slate-700/70 p-4">
         <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddApplicationModal}
             className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-3 font-mono text-sm font-bold text-white transition hover:bg-blue-500 active:scale-[0.98]"
             >
                 <Plus size={18} />

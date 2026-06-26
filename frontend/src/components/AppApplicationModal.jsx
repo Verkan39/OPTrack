@@ -1,6 +1,6 @@
 import { X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppData } from "../context/AppDataContext";
 
 const initialFormData = {
@@ -18,16 +18,49 @@ const initialFormData = {
   nextFollowUp: "",
 };
 
+function getFormDataFromApplication(application) {
+  return {
+    company: application.company || "",
+    role: application.role || "",
+    platform: application.platform || "other",
+    location: application.location === "Not added" ? "" : application.location || "",
+    salary: application.salary === "Not added" ? "" : application.salary || "",
+    status: application.rawStatus || application.status || "wishlist",
+    applicationLink: application.applicationLink || "",
+    resumeVersion: application.resumeVersion || "",
+    notes: application.notes || "",
+    appliedDate: application.appliedDate || "",
+    deadline: application.deadline || "",
+    nextFollowUp: application.nextFollowUp || "",
+  };
+}
+
 function AddApplicationModal() {
   const {
     isAddModalOpen,
-    setIsAddModalOpen,
+    editingApplication,
+    closeApplicationModal,
     addApplication,
+    updateApplicationDetails,
     isSavingApplication,
   } = useAppData();
 
   const [formData, setFormData] = useState(initialFormData);
   const [formError, setFormError] = useState("");
+
+  const isEditMode = Boolean(editingApplication);
+
+  useEffect(() => {
+    if (!isAddModalOpen) return;
+
+    if (editingApplication) {
+      setFormData(getFormDataFromApplication(editingApplication));
+    } else {
+      setFormData(initialFormData);
+    }
+
+    setFormError("");
+  }, [isAddModalOpen, editingApplication]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -43,19 +76,22 @@ function AddApplicationModal() {
 
     try {
       setFormError("");
-      await addApplication(formData);
+
+      if (isEditMode) {
+        await updateApplicationDetails(editingApplication.id, formData);
+      } else {
+        await addApplication(formData);
+      }
+
       setFormData(initialFormData);
     } catch (error) {
       console.error(error);
-      setFormError("Could not save application. Please try again.");
+      setFormError(
+        isEditMode
+          ? "Could not update application. Please try again."
+          : "Could not save application. Please try again."
+      );
     }
-  }
-
-  function handleClose() {
-    if (isSavingApplication) return;
-
-    setFormError("");
-    setIsAddModalOpen(false);
   }
 
   return (
@@ -77,16 +113,18 @@ function AddApplicationModal() {
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-slate-100">
-                  Add Application
+                  {isEditMode ? "Edit Application" : "Add Application"}
                 </h2>
                 <p className="text-sm text-slate-400">
-                  Add a new opportunity with dates, links, notes, and follow-ups.
+                  {isEditMode
+                    ? "Update this opportunity, notes, dates, and follow-ups."
+                    : "Add a new opportunity with dates, links, notes, and follow-ups."}
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={handleClose}
+                onClick={closeApplicationModal}
                 disabled={isSavingApplication}
                 className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -253,7 +291,13 @@ function AddApplicationModal() {
               disabled={isSavingApplication}
               className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 font-mono font-bold text-white transition hover:bg-blue-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSavingApplication ? "Saving..." : "Save Application"}
+              {isSavingApplication
+                ? isEditMode
+                  ? "Updating..."
+                  : "Saving..."
+                : isEditMode
+                  ? "Update Application"
+                  : "Save Application"}
             </button>
           </motion.form>
         </motion.div>

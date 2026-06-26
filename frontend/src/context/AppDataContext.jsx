@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getApplications, createApplication } from "../api/applications";
+import { getApplications, createApplication, updateApplicationStatusApi, updateApplication } from "../api/applications";
 import { getProfile } from "../api/profile";
 import { mockApplications } from "../data/mockApplications";
 
@@ -16,6 +16,9 @@ const fallbackProfile = {
 };
 
 export function AppDataProvider({ children }) {
+  const [editingApplication, setEditingApplication] = useState(null);
+  const [updatingApplicationId, setUpdatingApplicationId] = useState(null);
+
   const [applications, setApplications] = useState([]);
   const [profile, setProfile] = useState(fallbackProfile);
 
@@ -83,6 +86,23 @@ export function AppDataProvider({ children }) {
     });
   }, [applications, searchQuery]);
 
+  function openAddApplicationModal() {
+  setEditingApplication(null);
+  setIsAddModalOpen(true);
+}
+
+function openEditApplicationModal(application) {
+  setEditingApplication(application);
+  setIsAddModalOpen(true);
+}
+
+function closeApplicationModal() {
+  if (isSavingApplication) return;
+
+  setEditingApplication(null);
+  setIsAddModalOpen(false);
+}
+
   async function addApplication(data) {
     try {
         setIsSavingApplication(true);
@@ -115,30 +135,74 @@ export function AppDataProvider({ children }) {
     }
     }
 
-  function updateApplicationStatus(id, status) {
+  async function updateApplicationStatus(id, status) {
+    try {
+        setUpdatingApplicationId(Number(id));
+        setApiError("");
+
+        const updatedApplication = await updateApplicationStatusApi(id, status);
+
+        setApplications((prev) =>
+        prev.map((application) =>
+            application.id === Number(id) ? updatedApplication : application
+        )
+        );
+
+        setNotifications((prev) => [
+        {
+            id: Date.now(),
+            title: "Status updated",
+            message: `${updatedApplication.role} at ${updatedApplication.company} was updated in Django.`,
+            unread: true,
+        },
+        ...prev,
+        ]);
+    } catch (error) {
+        console.error("Update status error:", error);
+
+        setApiError("Could not update application status. Please try again.");
+
+        throw error;
+    } finally {
+        setUpdatingApplicationId(null);
+    }
+}
+
+async function updateApplicationDetails(id, data) {
+  try {
+    setIsSavingApplication(true);
+    setApiError("");
+
+    const updatedApplication = await updateApplication(id, data);
+
     setApplications((prev) =>
       prev.map((application) =>
-        application.id === Number(id)
-          ? {
-              ...application,
-              status,
-              lastUpdated: "Just now",
-            }
-          : application
+        application.id === Number(id) ? updatedApplication : application
       )
     );
+
+    setEditingApplication(null);
+    setIsAddModalOpen(false);
 
     setNotifications((prev) => [
       {
         id: Date.now(),
-        title: "Status updated locally",
-        message:
-          "This is temporary. Backend PATCH will be connected in the next step.",
+        title: "Application updated",
+        message: `${updatedApplication.role} at ${updatedApplication.company} was updated in Django.`,
         unread: true,
       },
       ...prev,
     ]);
+  } catch (error) {
+    console.error("Update application error:", error);
+
+    setApiError("Could not update application. Please try again.");
+
+    throw error;
+  } finally {
+    setIsSavingApplication(false);
   }
+}
 
   function updateProfile(updatedProfile) {
     setProfile(updatedProfile);
@@ -181,6 +245,12 @@ export function AppDataProvider({ children }) {
     isLoadingProfile,
     apiError,
     isSavingApplication,
+    updatingApplicationId,
+    editingApplication,
+    openAddApplicationModal,
+    openEditApplicationModal,
+    closeApplicationModal,
+    updateApplicationDetails,
   };
 
   return (

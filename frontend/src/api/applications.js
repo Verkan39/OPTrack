@@ -19,3 +19,21 @@ export async function createApplication(applicationData) {
 
   return mapApplicationFromApi(createdApplication);
 }
+
+export async function updateApplication(id, applicationData) {
+  const updatedApplication = await apiFetch(`/api/applications/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify(mapApplicationToApi(applicationData)),
+  });
+
+  return mapApplicationFromApi(updatedApplication);
+}
+
+export async function updateApplicationStatusApi(id, status) {
+  const updatedApplication = await apiFetch(`/api/applications/${id}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+
+  return mapApplicationFromApi(updatedApplication);
+}

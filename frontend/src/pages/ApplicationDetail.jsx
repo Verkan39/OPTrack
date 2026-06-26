@@ -6,8 +6,7 @@ import { useAppData } from "../context/AppDataContext";
 
 function ApplicationDetailPage() {
   const { id } = useParams();
-  const { applications, updateApplicationStatus } = useAppData();
-
+  const {applications,updateApplicationStatus, updatingApplicationId,openEditApplicationModal} = useAppData();
   const application = applications.find((item) => item.id === Number(id));
 
   if (!application) {
@@ -46,7 +45,16 @@ function ApplicationDetailPage() {
               </p>
             </div>
 
-            <StatusBadge status={application.status} />
+            <div className="flex flex-col items-end gap-3">
+                <StatusBadge status={application.status} />
+
+                <button
+                    onClick={() => openEditApplicationModal(application)}
+                    className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 font-mono text-xs font-bold text-slate-100 transition hover:bg-slate-700 active:scale-[0.98]"
+                >
+                    Edit Application
+                </button>
+            </div>
           </div>
 
           <div className="mt-8 grid gap-6 sm:grid-cols-3">
@@ -67,11 +75,16 @@ function ApplicationDetailPage() {
 
           <select
             value={application.status}
-            onChange={(event) =>
-              updateApplicationStatus(application.id, event.target.value)
-            }
-            className="mt-6 w-full rounded-lg border border-blue-300 bg-slate-900 px-4 py-3 font-bold text-white outline-none"
-          >
+            disabled={updatingApplicationId === application.id}
+            onChange={async (event) => {
+                try {
+                await updateApplicationStatus(application.id, event.target.value);
+                } catch (error) {
+                console.error(error);
+                }
+            }}
+            className="mt-6 w-full rounded-lg border border-blue-300 bg-slate-900 px-4 py-3 font-bold text-white outline-none disabled:cursor-not-allowed disabled:opacity-60"
+            >
             <option value="wishlist">Wishlist</option>
             <option value="applied">Applied</option>
             <option value="online_assessment">Online Assessment</option>
@@ -81,6 +94,11 @@ function ApplicationDetailPage() {
             <option value="ghosted">Ghosted</option>
             <option value="closed">Closed</option>
           </select>
+          {updatingApplicationId === application.id && (
+            <p className="mt-3 text-sm font-medium text-blue-100">
+                Saving status...
+            </p>
+            )}
         </div>
       </section>
 
