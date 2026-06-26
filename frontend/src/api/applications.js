@@ -1,5 +1,12 @@
 import { apiFetch } from "./client";
+import { mapApplicationFromApi } from "./mappers";
 
-export function getApplications() {
-  return apiFetch("/api/applications/");
+export async function getApplications() {
+  const response = await apiFetch("/api/applications/");
+
+  const applications = Array.isArray(response)
+    ? response
+    : response.results || [];
+
+  return applications.map(mapApplicationFromApi);
 }

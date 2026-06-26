@@ -1,12 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getApplications } from "../api/applications";
+import { getProfile } from "../api/profile";
 import { mockApplications } from "../data/mockApplications";
 
 const AppDataContext = createContext(null);
 
-const APPLICATIONS_STORAGE_KEY = "trackflow_applications";
-const PROFILE_STORAGE_KEY = "trackflow_profile";
-
-const defaultProfile = {
+const fallbackProfile = {
   name: "Vedanshu",
   headline: "Job Seeker Pro",
   email: "vedanshu@example.com",
@@ -16,49 +15,55 @@ const defaultProfile = {
   bio: "Tracking internship applications, referrals, interviews, and follow-ups in one place.",
 };
 
-function readLocalStorage(key, fallback) {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 export function AppDataProvider({ children }) {
-  const [applications, setApplications] = useState(() =>
-    readLocalStorage(APPLICATIONS_STORAGE_KEY, mockApplications)
-  );
-
-  const [profile, setProfile] = useState(() =>
-    readLocalStorage(PROFILE_STORAGE_KEY, defaultProfile)
-  );
+  const [applications, setApplications] = useState([]);
+  const [profile, setProfile] = useState(fallbackProfile);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [apiError, setApiError] = useState("");
+
   const [notifications, setNotifications] = useState([
     {
       id: 1,
-      title: "Interview reminder",
-      message: "Design Lead interview is scheduled for today.",
-      unread: true,
-    },
-    {
-      id: 2,
-      title: "Follow-up due",
-      message: "Send follow-up to Vercel recruiter.",
+      title: "Backend integration started",
+      message: "TrackFlow is now reading data from Django API.",
       unread: true,
     },
   ]);
 
   useEffect(() => {
-    localStorage.setItem(APPLICATIONS_STORAGE_KEY, JSON.stringify(applications));
-  }, [applications]);
+    async function loadInitialData() {
+      try {
+        setApiError("");
 
-  useEffect(() => {
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-  }, [profile]);
+        const [applicationsData, profileData] = await Promise.all([
+          getApplications(),
+          getProfile(),
+        ]);
+
+        setApplications(applicationsData);
+        setProfile(profileData);
+      } catch (error) {
+        console.error(error);
+
+        setApiError(
+          "Could not load data from Django API. Showing mock fallback data."
+        );
+
+        setApplications(mockApplications);
+        setProfile(fallbackProfile);
+      } finally {
+        setIsLoadingApplications(false);
+        setIsLoadingProfile(false);
+      }
+    }
+
+    loadInitialData();
+  }, []);
 
   const filteredApplications = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -70,7 +75,8 @@ export function AppDataProvider({ children }) {
         application.company.toLowerCase().includes(query) ||
         application.role.toLowerCase().includes(query) ||
         application.platform.toLowerCase().includes(query) ||
-        application.status.toLowerCase().includes(query)
+        application.status.toLowerCase().includes(query) ||
+        application.location.toLowerCase().includes(query)
       );
     });
   }, [applications, searchQuery]);
@@ -80,12 +86,17 @@ export function AppDataProvider({ children }) {
       id: Date.now(),
       company: data.company,
       role: data.role,
-      platform: data.platform || "Manual",
-      status: data.status || "applied",
+      platform: data.platform || "manual",
+      status: data.status || "wishlist",
       location: data.location || "Remote",
       salary: data.salary || "Not added",
       lastUpdated: "Just now",
-      stage: data.status || "Applied",
+      applicationLink: "",
+      resumeVersion: "",
+      notes: "",
+      appliedDate: "",
+      deadline: "",
+      nextFollowUp: "",
     };
 
     setApplications((prev) => [newApplication, ...prev]);
@@ -94,8 +105,9 @@ export function AppDataProvider({ children }) {
     setNotifications((prev) => [
       {
         id: Date.now(),
-        title: "Application added",
-        message: `${data.role} at ${data.company} was added.`,
+        title: "Application added locally",
+        message:
+          "This is temporary. Backend POST will be connected in the next step.",
         unread: true,
       },
       ...prev,
@@ -109,12 +121,22 @@ export function AppDataProvider({ children }) {
           ? {
               ...application,
               status,
-              stage: status,
               lastUpdated: "Just now",
             }
           : application
       )
     );
+
+    setNotifications((prev) => [
+      {
+        id: Date.now(),
+        title: "Status updated locally",
+        message:
+          "This is temporary. Backend PATCH will be connected in the next step.",
+        unread: true,
+      },
+      ...prev,
+    ]);
   }
 
   function updateProfile(updatedProfile) {
@@ -123,8 +145,9 @@ export function AppDataProvider({ children }) {
     setNotifications((prev) => [
       {
         id: Date.now(),
-        title: "Profile updated",
-        message: "Your TrackFlow profile was updated successfully.",
+        title: "Profile updated locally",
+        message:
+          "This is temporary. Backend profile update will be connected later.",
         unread: true,
       },
       ...prev,
@@ -153,6 +176,9 @@ export function AppDataProvider({ children }) {
     updateProfile,
     notifications,
     markNotificationsRead,
+    isLoadingApplications,
+    isLoadingProfile,
+    apiError,
   };
 
   return (

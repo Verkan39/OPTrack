@@ -8,7 +8,7 @@ import { useAppData } from "../context/AppDataContext";
 
 function Dashboard() {
 const [momentumView, setMomentumView] = useState("weekly");
-  const { applications } = useAppData();
+  const { applications, isLoadingApplications, apiError } = useAppData();
 
   const totalApplications = applications.length;
   const interviewCount = applications.filter(
