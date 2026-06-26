@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getApplications } from "../api/applications";
+import { getApplications, createApplication } from "../api/applications";
 import { getProfile } from "../api/profile";
 import { mockApplications } from "../data/mockApplications";
 
@@ -25,6 +25,8 @@ export function AppDataProvider({ children }) {
   const [isLoadingApplications, setIsLoadingApplications] = useState(true);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [apiError, setApiError] = useState("");
+
+  const [isSavingApplication, setIsSavingApplication] = useState(false);
 
   const [notifications, setNotifications] = useState([
     {
@@ -81,38 +83,37 @@ export function AppDataProvider({ children }) {
     });
   }, [applications, searchQuery]);
 
-  function addApplication(data) {
-    const newApplication = {
-      id: Date.now(),
-      company: data.company,
-      role: data.role,
-      platform: data.platform || "manual",
-      status: data.status || "wishlist",
-      location: data.location || "Remote",
-      salary: data.salary || "Not added",
-      lastUpdated: "Just now",
-      applicationLink: "",
-      resumeVersion: "",
-      notes: "",
-      appliedDate: "",
-      deadline: "",
-      nextFollowUp: "",
-    };
+  async function addApplication(data) {
+    try {
+        setIsSavingApplication(true);
+        setApiError("");
 
-    setApplications((prev) => [newApplication, ...prev]);
-    setIsAddModalOpen(false);
+        const createdApplication = await createApplication(data);
 
-    setNotifications((prev) => [
-      {
-        id: Date.now(),
-        title: "Application added locally",
-        message:
-          "This is temporary. Backend POST will be connected in the next step.",
-        unread: true,
-      },
-      ...prev,
-    ]);
-  }
+        setApplications((prev) => [createdApplication, ...prev]);
+        setIsAddModalOpen(false);
+
+        setNotifications((prev) => [
+        {
+            id: Date.now(),
+            title: "Application added",
+            message: `${createdApplication.role} at ${createdApplication.company} was saved to Django.`,
+            unread: true,
+        },
+        ...prev,
+        ]);
+    } catch (error) {
+        console.error("Create application error:", error);
+
+        setApiError(
+        "Could not create application. Please check the form and try again."
+        );
+
+        throw error;
+    } finally {
+        setIsSavingApplication(false);
+    }
+    }
 
   function updateApplicationStatus(id, status) {
     setApplications((prev) =>
@@ -179,6 +180,7 @@ export function AppDataProvider({ children }) {
     isLoadingApplications,
     isLoadingProfile,
     apiError,
+    isSavingApplication,
   };
 
   return (

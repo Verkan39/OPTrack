@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import { mapApplicationFromApi } from "./mappers";
+import { mapApplicationFromApi, mapApplicationToApi } from "./mappers";
 
 export async function getApplications() {
   const response = await apiFetch("/api/applications/");
@@ -9,4 +9,13 @@ export async function getApplications() {
     : response.results || [];
 
   return applications.map(mapApplicationFromApi);
+}
+
+export async function createApplication(applicationData) {
+  const createdApplication = await apiFetch("/api/applications/", {
+    method: "POST",
+    body: JSON.stringify(mapApplicationToApi(applicationData)),
+  });
+
+  return mapApplicationFromApi(createdApplication);
 }

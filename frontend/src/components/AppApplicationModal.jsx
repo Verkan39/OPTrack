@@ -3,17 +3,31 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { useAppData } from "../context/AppDataContext";
 
-function AddApplicationModal() {
-  const { isAddModalOpen, setIsAddModalOpen, addApplication } = useAppData();
+const initialFormData = {
+  company: "",
+  role: "",
+  platform: "other",
+  location: "",
+  salary: "",
+  status: "wishlist",
+  applicationLink: "",
+  resumeVersion: "",
+  notes: "",
+  appliedDate: "",
+  deadline: "",
+  nextFollowUp: "",
+};
 
-  const [formData, setFormData] = useState({
-    company: "",
-    role: "",
-    platform: "",
-    location: "",
-    salary: "",
-    status: "applied",
-  });
+function AddApplicationModal() {
+  const {
+    isAddModalOpen,
+    setIsAddModalOpen,
+    addApplication,
+    isSavingApplication,
+  } = useAppData();
+
+  const [formData, setFormData] = useState(initialFormData);
+  const [formError, setFormError] = useState("");
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -24,18 +38,24 @@ function AddApplicationModal() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    addApplication(formData);
 
-    setFormData({
-      company: "",
-      role: "",
-      platform: "",
-      location: "",
-      salary: "",
-      status: "applied",
-    });
+    try {
+      setFormError("");
+      await addApplication(formData);
+      setFormData(initialFormData);
+    } catch (error) {
+      console.error(error);
+      setFormError("Could not save application. Please try again.");
+    }
+  }
+
+  function handleClose() {
+    if (isSavingApplication) return;
+
+    setFormError("");
+    setIsAddModalOpen(false);
   }
 
   return (
@@ -49,7 +69,7 @@ function AddApplicationModal() {
         >
           <motion.form
             onSubmit={handleSubmit}
-            className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50"
             initial={{ scale: 0.94, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.94, y: 20, opacity: 0 }}
@@ -60,79 +80,180 @@ function AddApplicationModal() {
                   Add Application
                 </h2>
                 <p className="text-sm text-slate-400">
-                  Add a new opportunity to your tracker.
+                  Add a new opportunity with dates, links, notes, and follow-ups.
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white"
+                onClick={handleClose}
+                disabled={isSavingApplication}
+                className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                label="Company"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                required
-              />
-              <Input
-                label="Platform"
-                name="platform"
-                value={formData.platform}
-                onChange={handleChange}
-                placeholder="LinkedIn, WellFound..."
-              />
-              <Input
-                label="Location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-              />
-              <Input
-                label="Salary"
-                name="salary"
-                value={formData.salary}
-                onChange={handleChange}
-                placeholder="$100k - $150k"
-              />
+            {formError && (
+              <div className="mb-4 rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+                {formError}
+              </div>
+            )}
 
-              <label className="space-y-2">
-                <span className="font-mono text-xs uppercase tracking-widest text-slate-400">
-                  Status
-                </span>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
-                >
-                  <option value="wishlist">Wishlist</option>
-                  <option value="applied">Applied</option>
-                  <option value="interview">Interview</option>
-                  <option value="offer">Offer</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </label>
+            <div className="space-y-6">
+              <section>
+                <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-blue-300">
+                  Basic Details
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Company"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Input
+                    label="Role"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    required
+                  />
+
+                  <Select
+                    label="Platform"
+                    name="platform"
+                    value={formData.platform}
+                    onChange={handleChange}
+                    options={[
+                      ["other", "Other"],
+                      ["linkedin", "LinkedIn"],
+                      ["wellfound", "WellFound"],
+                      ["internshala", "Internshala"],
+                      ["unstop", "Unstop"],
+                      ["company_website", "Company Website"],
+                      ["referral", "Referral"],
+                      ["cold_email", "Cold Email"],
+                    ]}
+                  />
+
+                  <Select
+                    label="Status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    options={[
+                      ["wishlist", "Wishlist"],
+                      ["applied", "Applied"],
+                      ["online_assessment", "Online Assessment"],
+                      ["interview", "Interview"],
+                      ["offer", "Offer"],
+                      ["rejected", "Rejected"],
+                      ["ghosted", "Ghosted"],
+                      ["closed", "Closed"],
+                    ]}
+                  />
+
+                  <Input
+                    label="Location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="Remote, Bangalore..."
+                  />
+
+                  <Input
+                    label="Salary"
+                    name="salary"
+                    value={formData.salary}
+                    onChange={handleChange}
+                    placeholder="₹50k/month, $100k..."
+                  />
+                </div>
+              </section>
+
+              <section>
+                <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-blue-300">
+                  Timeline
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Input
+                    label="Applied Date"
+                    type="date"
+                    name="appliedDate"
+                    value={formData.appliedDate}
+                    onChange={handleChange}
+                  />
+
+                  <Input
+                    label="Deadline"
+                    type="date"
+                    name="deadline"
+                    value={formData.deadline}
+                    onChange={handleChange}
+                  />
+
+                  <Input
+                    label="Next Follow-up"
+                    type="date"
+                    name="nextFollowUp"
+                    value={formData.nextFollowUp}
+                    onChange={handleChange}
+                  />
+                </div>
+              </section>
+
+              <section>
+                <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-blue-300">
+                  Extra Information
+                </p>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Application Link"
+                    type="url"
+                    name="applicationLink"
+                    value={formData.applicationLink}
+                    onChange={handleChange}
+                    placeholder="https://..."
+                  />
+
+                  <Input
+                    label="Resume Version"
+                    name="resumeVersion"
+                    value={formData.resumeVersion}
+                    onChange={handleChange}
+                    placeholder="SDE Resume v1"
+                  />
+                </div>
+
+                <label className="mt-4 block space-y-2">
+                  <span className="font-mono text-xs uppercase tracking-widest text-slate-400">
+                    Notes
+                  </span>
+
+                  <textarea
+                    name="notes"
+                    value={formData.notes}
+                    onChange={handleChange}
+                    rows={4}
+                    placeholder="Referral info, recruiter name, next steps..."
+                    className="w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-600 focus:border-blue-400"
+                  />
+                </label>
+              </section>
             </div>
 
             <button
               type="submit"
-              className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 font-mono font-bold text-white transition hover:bg-blue-500 active:scale-[0.98]"
+              disabled={isSavingApplication}
+              className="mt-6 w-full rounded-xl bg-blue-600 px-4 py-3 font-mono font-bold text-white transition hover:bg-blue-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Save Application
+              {isSavingApplication ? "Saving..." : "Save Application"}
             </button>
           </motion.form>
         </motion.div>
@@ -147,10 +268,32 @@ function Input({ label, ...props }) {
       <span className="font-mono text-xs uppercase tracking-widest text-slate-400">
         {label}
       </span>
+
       <input
         {...props}
         className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-600 focus:border-blue-400"
       />
+    </label>
+  );
+}
+
+function Select({ label, options, ...props }) {
+  return (
+    <label className="space-y-2">
+      <span className="font-mono text-xs uppercase tracking-widest text-slate-400">
+        {label}
+      </span>
+
+      <select
+        {...props}
+        className="w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-slate-100 outline-none focus:border-blue-400"
+      >
+        {options.map(([value, label]) => (
+          <option key={value} value={value}>
+            {label}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }

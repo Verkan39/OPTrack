@@ -5,7 +5,13 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import ApplicationSerializer, UserProfileSerializer
 from .forms import ApplicationForm
 from .models import Applications, UserProfile
+from django.http import JsonResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
 # Create your views here.
+
+@ensure_csrf_cookie
+def csrf_cookie(request):
+    return JsonResponse({"detail": "CSRF cookie set"})
 
 @login_required
 def application_list(request):

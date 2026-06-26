@@ -129,6 +129,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+]
+
 LOGIN_URL="/admin/login/"
 LOGIN_REDIRECT_URL="/applications/"
 LOGOUT_REDIRECT_URL="/admin/login/"

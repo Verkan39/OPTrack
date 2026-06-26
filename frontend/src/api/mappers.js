@@ -48,3 +48,40 @@ export function mapProfileFromApi(profile) {
     bio: profile.bio || "",
   };
 }
+
+export function mapApplicationToApi(application) {
+  const payload = {
+    company: application.company,
+    role: application.role,
+    platform: application.platform || "other",
+    status: application.status || "wishlist",
+    location: application.location || "",
+    salary: application.salary || "",
+  };
+
+  if (application.applicationLink) {
+    payload.application_link = application.applicationLink;
+  }
+
+  if (application.resumeVersion) {
+    payload.resume_version = application.resumeVersion;
+  }
+
+  if (application.notes) {
+    payload.notes = application.notes;
+  }
+
+  if (application.appliedDate) {
+    payload.applied_date = application.appliedDate;
+  }
+
+  if (application.deadline) {
+    payload.deadline = application.deadline;
+  }
+
+  if (application.nextFollowUp) {
+    payload.next_follow_up = application.nextFollowUp;
+  }
+
+  return payload;
+}
