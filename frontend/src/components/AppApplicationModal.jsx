@@ -105,7 +105,7 @@ function AddApplicationModal() {
         >
           <motion.form
             onSubmit={handleSubmit}
-            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50"
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto custom-scrollbar rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50"
             initial={{ scale: 0.94, y: 20, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
             exit={{ scale: 0.94, y: 20, opacity: 0 }}
