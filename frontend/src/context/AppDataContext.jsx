@@ -1,12 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getApplications, createApplication, updateApplicationStatusApi, updateApplication, deleteApplicationApi } from "../api/applications";
+import { getProfile, updateProfileApi } from "../api/profile";
 import { mockApplications } from "../data/mockApplications";
 
 const AppDataContext = createContext(null);
 
-const APPLICATIONS_STORAGE_KEY = "trackflow_applications";
-const PROFILE_STORAGE_KEY = "trackflow_profile";
-
-const defaultProfile = {
+const fallbackProfile = {
   name: "Vedanshu",
   headline: "Job Seeker Pro",
   email: "vedanshu@example.com",
@@ -16,49 +15,62 @@ const defaultProfile = {
   bio: "Tracking internship applications, referrals, interviews, and follow-ups in one place.",
 };
 
-function readLocalStorage(key, fallback) {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
 export function AppDataProvider({ children }) {
-  const [applications, setApplications] = useState(() =>
-    readLocalStorage(APPLICATIONS_STORAGE_KEY, mockApplications)
-  );
+  const [editingApplication, setEditingApplication] = useState(null);
+  const [updatingApplicationId, setUpdatingApplicationId] = useState(null);
+  const [deletingApplicationId, setDeletingApplicationId] = useState(null);
 
-  const [profile, setProfile] = useState(() =>
-    readLocalStorage(PROFILE_STORAGE_KEY, defaultProfile)
-  );
+  const [applications, setApplications] = useState([]);
+  const [profile, setProfile] = useState(fallbackProfile);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  const [isLoadingApplications, setIsLoadingApplications] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [apiError, setApiError] = useState("");
+
+  const [isSavingApplication, setIsSavingApplication] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
   const [notifications, setNotifications] = useState([
     {
       id: 1,
-      title: "Interview reminder",
-      message: "Design Lead interview is scheduled for today.",
-      unread: true,
-    },
-    {
-      id: 2,
-      title: "Follow-up due",
-      message: "Send follow-up to Vercel recruiter.",
+      title: "Backend integration started",
+      message: "TrackFlow is now reading data from Django API.",
       unread: true,
     },
   ]);
 
   useEffect(() => {
-    localStorage.setItem(APPLICATIONS_STORAGE_KEY, JSON.stringify(applications));
-  }, [applications]);
+    async function loadInitialData() {
+      try {
+        setApiError("");
 
-  useEffect(() => {
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-  }, [profile]);
+        const [applicationsData, profileData] = await Promise.all([
+          getApplications(),
+          getProfile(),
+        ]);
+
+        setApplications(applicationsData);
+        setProfile(profileData);
+      } catch (error) {
+        console.error(error);
+
+        setApiError(
+          "Could not load data from Django API. Showing mock fallback data."
+        );
+
+        setApplications(mockApplications);
+        setProfile(fallbackProfile);
+      } finally {
+        setIsLoadingApplications(false);
+        setIsLoadingProfile(false);
+      }
+    }
+
+    loadInitialData();
+  }, []);
 
   const filteredApplications = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -70,65 +82,190 @@ export function AppDataProvider({ children }) {
         application.company.toLowerCase().includes(query) ||
         application.role.toLowerCase().includes(query) ||
         application.platform.toLowerCase().includes(query) ||
-        application.status.toLowerCase().includes(query)
+        application.status.toLowerCase().includes(query) ||
+        application.location.toLowerCase().includes(query)
       );
     });
   }, [applications, searchQuery]);
 
-  function addApplication(data) {
-    const newApplication = {
-      id: Date.now(),
-      company: data.company,
-      role: data.role,
-      platform: data.platform || "Manual",
-      status: data.status || "applied",
-      location: data.location || "Remote",
-      salary: data.salary || "Not added",
-      lastUpdated: "Just now",
-      stage: data.status || "Applied",
-    };
+  function openAddApplicationModal() {
+  setEditingApplication(null);
+  setIsAddModalOpen(true);
+}
 
-    setApplications((prev) => [newApplication, ...prev]);
+function openEditApplicationModal(application) {
+  setEditingApplication(application);
+  setIsAddModalOpen(true);
+}
+
+function closeApplicationModal() {
+  if (isSavingApplication) return;
+
+  setEditingApplication(null);
+  setIsAddModalOpen(false);
+}
+
+  async function addApplication(data) {
+    try {
+        setIsSavingApplication(true);
+        setApiError("");
+
+        const createdApplication = await createApplication(data);
+
+        setApplications((prev) => [createdApplication, ...prev]);
+        setIsAddModalOpen(false);
+
+        setNotifications((prev) => [
+        {
+            id: Date.now(),
+            title: "Application added",
+            message: `${createdApplication.role} at ${createdApplication.company} was saved to Django.`,
+            unread: true,
+        },
+        ...prev,
+        ]);
+    } catch (error) {
+        console.error("Create application error:", error);
+
+        setApiError(
+        "Could not create application. Please check the form and try again."
+        );
+
+        throw error;
+    } finally {
+        setIsSavingApplication(false);
+    }
+    }
+
+  async function updateApplicationStatus(id, status) {
+    try {
+        setUpdatingApplicationId(Number(id));
+        setApiError("");
+
+        const updatedApplication = await updateApplicationStatusApi(id, status);
+
+        setApplications((prev) =>
+        prev.map((application) =>
+            application.id === Number(id) ? updatedApplication : application
+        )
+        );
+
+        setNotifications((prev) => [
+        {
+            id: Date.now(),
+            title: "Status updated",
+            message: `${updatedApplication.role} at ${updatedApplication.company} was updated in Django.`,
+            unread: true,
+        },
+        ...prev,
+        ]);
+    } catch (error) {
+        console.error("Update status error:", error);
+
+        setApiError("Could not update application status. Please try again.");
+
+        throw error;
+    } finally {
+        setUpdatingApplicationId(null);
+    }
+}
+
+async function updateApplicationDetails(id, data) {
+  try {
+    setIsSavingApplication(true);
+    setApiError("");
+
+    const updatedApplication = await updateApplication(id, data);
+
+    setApplications((prev) =>
+      prev.map((application) =>
+        application.id === Number(id) ? updatedApplication : application
+      )
+    );
+
+    setEditingApplication(null);
     setIsAddModalOpen(false);
 
     setNotifications((prev) => [
       {
         id: Date.now(),
-        title: "Application added",
-        message: `${data.role} at ${data.company} was added.`,
+        title: "Application updated",
+        message: `${updatedApplication.role} at ${updatedApplication.company} was updated in Django.`,
         unread: true,
       },
       ...prev,
     ]);
+  } catch (error) {
+    console.error("Update application error:", error);
+
+    setApiError("Could not update application. Please try again.");
+
+    throw error;
+  } finally {
+    setIsSavingApplication(false);
+  }
+}
+
+  async function deleteApplication(id) {
+    try {
+      setDeletingApplicationId(Number(id));
+      setApiError("");
+
+      await deleteApplicationApi(id);
+
+      setApplications((prev) =>
+        prev.filter((application) => application.id !== Number(id))
+      );
+
+      setNotifications((prev) => [
+        {
+          id: Date.now(),
+          title: "Application deleted",
+          message: "The application was removed from Django.",
+          unread: true,
+        },
+        ...prev,
+      ]);
+    } catch (error) {
+      console.error("Delete application error:", error);
+
+      setApiError("Could not delete application. Please try again.");
+
+      throw error;
+    } finally {
+      setDeletingApplicationId(null);
+    }
   }
 
-  function updateApplicationStatus(id, status) {
-    setApplications((prev) =>
-      prev.map((application) =>
-        application.id === Number(id)
-          ? {
-              ...application,
-              status,
-              stage: status,
-              lastUpdated: "Just now",
-            }
-          : application
-      )
-    );
-  }
+  async function updateProfile(updatedProfile) {
+    try {
+      setIsSavingProfile(true);
+      setApiError("");
 
-  function updateProfile(updatedProfile) {
-    setProfile(updatedProfile);
+      const savedProfile = await updateProfileApi(updatedProfile);
 
-    setNotifications((prev) => [
-      {
-        id: Date.now(),
-        title: "Profile updated",
-        message: "Your TrackFlow profile was updated successfully.",
-        unread: true,
-      },
-      ...prev,
-    ]);
+      setProfile(savedProfile);
+
+      setNotifications((prev) => [
+        {
+          id: Date.now(),
+          title: "Profile updated",
+          message: "Your profile was saved to Django.",
+          unread: true,
+        },
+        ...prev,
+      ]);
+
+      return savedProfile;
+    } catch (error) {
+      console.error("Update profile error:", error);
+
+      setApiError("Could not update profile. Please try again.");
+
+      throw error;
+    } finally {
+      setIsSavingProfile(false);
+    }
   }
 
   function markNotificationsRead() {
@@ -153,6 +290,19 @@ export function AppDataProvider({ children }) {
     updateProfile,
     notifications,
     markNotificationsRead,
+    isLoadingApplications,
+    isLoadingProfile,
+    apiError,
+    isSavingApplication,
+    updatingApplicationId,
+    editingApplication,
+    openAddApplicationModal,
+    openEditApplicationModal,
+    closeApplicationModal,
+    updateApplicationDetails,
+    isSavingProfile,
+    deleteApplication,
+    deletingApplicationId
   };
 
   return (

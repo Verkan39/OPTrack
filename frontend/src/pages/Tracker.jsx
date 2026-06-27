@@ -13,7 +13,7 @@ const columns = [
 ];
 
 function TrackerPage() {
-  const { filteredApplications, setIsAddModalOpen } = useAppData();
+  const { filteredApplications, openAddApplicationModal } = useAppData();
   const [activeStatus, setActiveStatus] = useState("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -58,7 +58,7 @@ function TrackerPage() {
           </button>
 
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={openAddApplicationModal}
             className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-mono font-bold text-white transition hover:bg-blue-500 active:scale-[0.98]"
           >
             <Plus size={18} />

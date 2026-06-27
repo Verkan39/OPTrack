@@ -1,19 +1,24 @@
 import { Mail, MapPin, Pencil, Save, Target, UserRound } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppData } from "../context/AppDataContext";
 
 function ProfilePage() {
-  const { profile, updateProfile, applications } = useAppData();
+  const { profile, updateProfile, applications, isSavingProfile } = useAppData();  
   const [formData, setFormData] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  const initials = profile.name
-    .split(" ")
-    .map((part) => part.charAt(0))
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  useEffect(() => {
+    setFormData(profile);
+  }, [profile]);
+
+  const initials = (profile.name || "User")
+  .split(" ")
+  .map((part) => part.charAt(0))
+  .join("")
+  .slice(0, 2)
+  .toUpperCase();
 
   const activeApplications = applications.filter(
     (application) =>
@@ -33,10 +38,16 @@ function ProfilePage() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    updateProfile(formData);
-    setIsEditing(false);
+    setFormError("");
+
+    try {
+      await updateProfile(formData);
+      setIsEditing(false);
+    } catch (error) {
+      setFormError("Could not save profile. Please try again.");
+    }
   }
 
   function handleCancel() {
@@ -131,6 +142,12 @@ function ProfilePage() {
             </div>
           </div>
 
+          {formError && (
+            <div className="mb-5 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              {formError}
+            </div>
+          )}
+
           <div className="grid gap-5 md:grid-cols-2">
             <Input
               label="Full Name"
@@ -199,10 +216,11 @@ function ProfilePage() {
           {isEditing && (
             <button
               type="submit"
-              className="mt-6 flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-mono font-bold text-white transition hover:bg-blue-500 active:scale-[0.98]"
+              disabled={isSavingProfile}
+              className="mt-6 flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-mono font-bold text-white transition hover:bg-blue-500 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Save size={18} />
-              Save Changes
+              {isSavingProfile ? "Saving..." : "Save Changes"}
             </button>
           )}
         </form>
