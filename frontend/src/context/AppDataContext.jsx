@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getApplications, createApplication, updateApplicationStatusApi, updateApplication } from "../api/applications";
-import { getProfile } from "../api/profile";
+import { getProfile, updateProfileApi } from "../api/profile";
 import { mockApplications } from "../data/mockApplications";
 
 const AppDataContext = createContext(null);
@@ -30,6 +30,7 @@ export function AppDataProvider({ children }) {
   const [apiError, setApiError] = useState("");
 
   const [isSavingApplication, setIsSavingApplication] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
   const [notifications, setNotifications] = useState([
     {
@@ -204,19 +205,35 @@ async function updateApplicationDetails(id, data) {
   }
 }
 
-  function updateProfile(updatedProfile) {
-    setProfile(updatedProfile);
+  async function updateProfile(updatedProfile) {
+    try {
+      setIsSavingProfile(true);
+      setApiError("");
 
-    setNotifications((prev) => [
-      {
-        id: Date.now(),
-        title: "Profile updated locally",
-        message:
-          "This is temporary. Backend profile update will be connected later.",
-        unread: true,
-      },
-      ...prev,
-    ]);
+      const savedProfile = await updateProfileApi(updatedProfile);
+
+      setProfile(savedProfile);
+
+      setNotifications((prev) => [
+        {
+          id: Date.now(),
+          title: "Profile updated",
+          message: "Your profile was saved to Django.",
+          unread: true,
+        },
+        ...prev,
+      ]);
+
+      return savedProfile;
+    } catch (error) {
+      console.error("Update profile error:", error);
+
+      setApiError("Could not update profile. Please try again.");
+
+      throw error;
+    } finally {
+      setIsSavingProfile(false);
+    }
   }
 
   function markNotificationsRead() {
@@ -251,6 +268,7 @@ async function updateApplicationDetails(id, data) {
     openEditApplicationModal,
     closeApplicationModal,
     updateApplicationDetails,
+    isSavingProfile,
   };
 
   return (

@@ -5,10 +5,13 @@ import { Link } from "react-router";
 import StatCard from "../components/StatCard";
 import StatusBadge from "../components/StatusBadge";
 import { useAppData } from "../context/AppDataContext";
+import { useAuth } from "../context/AuthContext";
 
 function Dashboard() {
 const [momentumView, setMomentumView] = useState("weekly");
   const { applications, isLoadingApplications, apiError } = useAppData();
+  const {user} =useAuth();
+  const username=user?.username || "there";
 
   const totalApplications = applications.length;
   const interviewCount = applications.filter(
@@ -40,7 +43,7 @@ const [momentumView, setMomentumView] = useState("weekly");
           </p>
 
           <h2 className="mt-3 text-4xl font-bold tracking-tight text-slate-100">
-            Good Morning, Vedanshu
+            Hey, {username}
           </h2>
 
           <p className="mt-2 text-slate-300">
