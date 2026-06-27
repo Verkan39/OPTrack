@@ -55,18 +55,18 @@ function Topbar() {
     <header className="sticky top-0 z-20 border-b border-slate-700/70 bg-[#050b18]/95 backdrop-blur">
       <div className="flex h-16 items-center justify-between px-8">
         <div className="relative w-full max-w-xl">
-          <Search
+          {/* <Search
             size={20}
             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-          />
+          /> */}
 
-          <input
+          {/* <input
             type="text"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Search applications, companies, or tasks..."
             className="w-full rounded-xl border border-slate-600 bg-slate-900 px-12 py-3 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-blue-400"
-          />
+          /> */}
         </div>
 
         <div className="relative flex items-center gap-5">

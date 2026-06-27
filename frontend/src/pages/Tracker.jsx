@@ -1,4 +1,4 @@
-import { AlertCircle, Filter, Loader2, Plus, X } from "lucide-react";
+import { AlertCircle, Filter, Loader2, Plus, Search, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import KanbanColumn from "../components/KanbanColumn";
@@ -23,7 +23,10 @@ const filterOptions = [
 
 function TrackerPage() {
   const {
+    filteredApplications,
     applications,
+    searchQuery,
+    setSearchQuery,
     openAddApplicationModal,
     isLoadingApplications,
     apiError,
@@ -33,19 +36,21 @@ function TrackerPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const visibleApplications = useMemo(() => {
-    if (activeStatus === "all") return applications;
+    if (activeStatus === "all") return filteredApplications;
 
-    return applications.filter(
+    return filteredApplications.filter(
       (application) => application.status === activeStatus
     );
-  }, [activeStatus, applications]);
+  }, [activeStatus, filteredApplications]);
 
   const totalVisible = visibleApplications.length;
   const hasApplications = applications.length > 0;
-  const isFiltered = activeStatus !== "all";
+  const hasSearchQuery = searchQuery.trim().length > 0;
+  const isFiltered = activeStatus !== "all" || hasSearchQuery;
 
   function clearFilters() {
     setActiveStatus("all");
+    setSearchQuery("");
   }
 
   return (
@@ -88,15 +93,20 @@ function TrackerPage() {
       )}
 
       <section className="rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-2xl shadow-black/20">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <p className="font-mono text-sm text-slate-400">
-            Showing{" "}
-            <span className="font-bold text-slate-100">{totalVisible}</span> of{" "}
-            <span className="font-bold text-slate-100">
-              {applications.length}
-            </span>{" "}
-            application(s)
-          </p>
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <label className="relative flex-1">
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+              size={18}
+            />
+
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search by company, role, platform, status, or location..."
+              className="w-full rounded-xl border border-slate-700 bg-slate-900 py-3 pl-11 pr-4 text-slate-100 outline-none transition placeholder:text-slate-500 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20"
+            />
+          </label>
 
           <div className="relative flex flex-wrap gap-3">
             <button
@@ -165,13 +175,22 @@ function TrackerPage() {
           </div>
         </div>
 
-        {activeStatus !== "all" && (
-          <div className="mt-4 border-t border-slate-800 pt-4">
-            <p className="inline-flex rounded-full border border-blue-400/30 bg-blue-400/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-blue-200">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-4">
+          <p className="font-mono text-sm text-slate-400">
+            Showing{" "}
+            <span className="font-bold text-slate-100">{totalVisible}</span> of{" "}
+            <span className="font-bold text-slate-100">
+              {applications.length}
+            </span>{" "}
+            application(s)
+          </p>
+
+          {activeStatus !== "all" && (
+            <p className="rounded-full border border-blue-400/30 bg-blue-400/10 px-3 py-1 font-mono text-xs uppercase tracking-widest text-blue-200">
               Status: {activeStatus}
             </p>
-          </div>
-        )}
+          )}
+        </div>
       </section>
 
       {isLoadingApplications ? (
@@ -210,11 +229,12 @@ function TrackerPage() {
       ) : totalVisible === 0 ? (
         <section className="rounded-2xl border border-slate-800 bg-slate-950 p-10 text-center shadow-2xl shadow-black/20">
           <h3 className="text-2xl font-bold text-slate-100">
-            No applications in this status
+            No matching applications
           </h3>
 
           <p className="mx-auto mt-2 max-w-xl text-slate-400">
-            Your applications exist, but none are currently in this status.
+            Your applications exist, but none match the current search or status
+            filter.
           </p>
 
           <button
@@ -222,7 +242,7 @@ function TrackerPage() {
             onClick={clearFilters}
             className="mt-6 inline-flex items-center gap-2 rounded-lg border border-blue-400/30 bg-blue-400/10 px-5 py-3 font-mono text-sm font-bold text-blue-200 transition hover:bg-blue-400/20 active:scale-[0.98]"
           >
-            Clear Filter
+            Clear Filters
           </button>
         </section>
       ) : (
