@@ -1,13 +1,32 @@
-import { CalendarDays, ExternalLink } from "lucide-react";
+import { CalendarDays, ExternalLink, Trash2, AlertTriangle } from "lucide-react";
 import { motion } from "motion/react";
-import { Link, useParams } from "react-router";
+import { Link, useParams, useNavigate } from "react-router";
 import StatusBadge from "../components/StatusBadge";
 import { useAppData } from "../context/AppDataContext";
+import { useState } from "react";
 
 function ApplicationDetailPage() {
   const { id } = useParams();
-  const {applications,updateApplicationStatus, updatingApplicationId,openEditApplicationModal} = useAppData();
+  const {
+    applications,
+    updateApplicationStatus,
+    updatingApplicationId,
+    openEditApplicationModal,
+    deleteApplication,
+    deletingApplicationId,
+  } = useAppData();
   const application = applications.find((item) => item.id === Number(id));
+  const navigate = useNavigate();
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  async function handleDeleteApplication() {
+    try {
+      await deleteApplication(application.id);
+      navigate("/tracker");
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   if (!application) {
     return <p className="text-slate-300">Application not found.</p>;
@@ -53,6 +72,15 @@ function ApplicationDetailPage() {
                     className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 font-mono text-xs font-bold text-slate-100 transition hover:bg-slate-700 active:scale-[0.98]"
                 >
                     Edit Application
+                </button>
+
+                <button
+                  onClick={() => setIsDeleteConfirmOpen(true)}
+                  disabled={deletingApplicationId === application.id}
+                  className="flex items-center gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 font-mono text-xs font-bold text-red-200 transition hover:bg-red-500/20 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Trash2 size={14} />
+                  {deletingApplicationId === application.id ? "Deleting..." : "Delete"}
                 </button>
             </div>
           </div>
@@ -175,6 +203,58 @@ function ApplicationDetailPage() {
       <Link to="/tracker" className="inline-block text-blue-300 hover:underline">
         Back to tracker
       </Link>
+      
+      {isDeleteConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl shadow-black/50">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="rounded-xl bg-red-500/10 p-3 text-red-300">
+                <AlertTriangle size={24} />
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold text-slate-100">
+                  Delete application?
+                </h3>
+                <p className="text-sm text-slate-400">
+                  This action cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <p className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-slate-300">
+              You are about to delete{" "}
+              <span className="font-bold text-slate-100">
+                {application.role} at {application.company}
+              </span>
+              .
+            </p>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsDeleteConfirmOpen(false)}
+                disabled={deletingApplicationId === application.id}
+                className="rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 font-mono text-sm font-bold text-slate-100 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteApplication}
+                disabled={deletingApplicationId === application.id}
+                className="rounded-lg bg-red-600 px-4 py-2 font-mono text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {deletingApplicationId === application.id
+                  ? "Deleting..."
+                  : "Delete Application"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </motion.div>
   );
 }

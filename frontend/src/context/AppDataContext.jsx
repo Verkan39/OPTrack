@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getApplications, createApplication, updateApplicationStatusApi, updateApplication } from "../api/applications";
+import { getApplications, createApplication, updateApplicationStatusApi, updateApplication, deleteApplicationApi } from "../api/applications";
 import { getProfile, updateProfileApi } from "../api/profile";
 import { mockApplications } from "../data/mockApplications";
 
@@ -18,6 +18,7 @@ const fallbackProfile = {
 export function AppDataProvider({ children }) {
   const [editingApplication, setEditingApplication] = useState(null);
   const [updatingApplicationId, setUpdatingApplicationId] = useState(null);
+  const [deletingApplicationId, setDeletingApplicationId] = useState(null);
 
   const [applications, setApplications] = useState([]);
   const [profile, setProfile] = useState(fallbackProfile);
@@ -205,6 +206,37 @@ async function updateApplicationDetails(id, data) {
   }
 }
 
+  async function deleteApplication(id) {
+    try {
+      setDeletingApplicationId(Number(id));
+      setApiError("");
+
+      await deleteApplicationApi(id);
+
+      setApplications((prev) =>
+        prev.filter((application) => application.id !== Number(id))
+      );
+
+      setNotifications((prev) => [
+        {
+          id: Date.now(),
+          title: "Application deleted",
+          message: "The application was removed from Django.",
+          unread: true,
+        },
+        ...prev,
+      ]);
+    } catch (error) {
+      console.error("Delete application error:", error);
+
+      setApiError("Could not delete application. Please try again.");
+
+      throw error;
+    } finally {
+      setDeletingApplicationId(null);
+    }
+  }
+
   async function updateProfile(updatedProfile) {
     try {
       setIsSavingProfile(true);
@@ -269,6 +301,8 @@ async function updateApplicationDetails(id, data) {
     closeApplicationModal,
     updateApplicationDetails,
     isSavingProfile,
+    deleteApplication,
+    deletingApplicationId
   };
 
   return (

@@ -37,3 +37,9 @@ export async function updateApplicationStatusApi(id, status) {
 
   return mapApplicationFromApi(updatedApplication);
 }
+
+export async function deleteApplicationApi(id) {
+  await apiFetch(`/api/applications/${id}/`, {
+    method: "DELETE",
+  });
+}
