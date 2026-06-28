@@ -1,24 +1,26 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
+from django.middleware.csrf import get_token
 from rest_framework import generics, viewsets
 from .serializers import ApplicationSerializer, UserProfileSerializer
 from .forms import ApplicationForm
 from .models import Applications, UserProfile
-from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-# Create your views here.
-User=get_user_model()
+
+User = get_user_model()
+
 
 @ensure_csrf_cookie
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def csrf_cookie(request):
-    return Response({"detail": "CSRF cookie set"})
+    return Response({"csrfToken": get_token(request)})
+
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
@@ -119,62 +121,83 @@ def me_view(request):
         }
     )
 
+
 @login_required
 def application_list(request):
-    applications=Applications.objects.filter(user=request.user).order_by("-id")
-    
-    return render(request, "applications/application_list.html",{
-        "applications":applications
-    })
-    
+    applications = Applications.objects.filter(user=request.user).order_by("-id")
+
+    return render(
+        request,
+        "applications/application_list.html",
+        {
+            "applications": applications,
+        },
+    )
+
+
 @login_required
 def application_create(request):
-    if request.method=="POST":
-        form=ApplicationForm(request.POST)
-        
+    if request.method == "POST":
+        form = ApplicationForm(request.POST)
+
         if form.is_valid():
-            application=form.save(commit=False)
-            application.user=request.user
+            application = form.save(commit=False)
+            application.user = request.user
             application.save()
             return redirect("application_list")
     else:
-        form=ApplicationForm()
-        
-    return render(request, "applications/application_form.html",{
-        "form":form,
-        "title":"Add Application"
-    })
-    
+        form = ApplicationForm()
+
+    return render(
+        request,
+        "applications/application_form.html",
+        {
+            "form": form,
+            "title": "Add Application",
+        },
+    )
+
+
 @login_required
 def application_update(request, pk):
-    applicaton=get_object_or_404(Applications, pk=pk, user=request.user)
-    
-    if request.method=="POST":
-        form=ApplicationForm(request.POST, instance=applicaton)
-        
+    applicaton = get_object_or_404(Applications, pk=pk, user=request.user)
+
+    if request.method == "POST":
+        form = ApplicationForm(request.POST, instance=applicaton)
+
         if form.is_valid():
             form.save()
             return redirect("application_list")
     else:
-        form=ApplicationForm(instance=applicaton)
-    
-    return render(request,"applications/application_form.html",{
-        "form":form,
-        "title":"Edit Application"
-    })
-    
+        form = ApplicationForm(instance=applicaton)
+
+    return render(
+        request,
+        "applications/application_form.html",
+        {
+            "form": form,
+            "title": "Edit Application",
+        },
+    )
+
+
 @login_required
 def application_delete(request, pk):
-    application=get_object_or_404(Applications, pk=pk, user=request.user)
-    
+    application = get_object_or_404(Applications, pk=pk, user=request.user)
+
     if request.method == "POST":
         application.delete()
         return redirect("application_list")
-    
-    return render(request, "applications/application_confirm_delete.html",{
-        "application":application
-    })
-    
+
+    return render(
+        request,
+        "applications/application_confirm_delete.html",
+        {
+            "application": application,
+        },
+    )
+
+
 class ApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]

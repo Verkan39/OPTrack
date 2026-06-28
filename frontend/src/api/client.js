@@ -1,37 +1,34 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
+let csrfToken = null;
+
 function apiUrl(path) {
   return `${API_BASE_URL}${path}`;
 }
 
-function getCookie(name) {
-  const cookies = document.cookie ? document.cookie.split("; ") : [];
-  const cookie = cookies.find((row) => row.startsWith(`${name}=`));
-
-  return cookie ? decodeURIComponent(cookie.split("=")[1]) : null;
-}
-
-async function ensureCsrfCookie() {
-  if (getCookie("csrftoken")) {
-    return;
+async function ensureCsrfToken() {
+  if (csrfToken) {
+    return csrfToken;
   }
 
-  const response = await fetch(apiUrl("/api/csrf/"), {
+  const response = await fetch(apiUrl("/api/auth/csrf/"), {
+    method: "GET",
     credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error("Could not set CSRF cookie");
+    throw new Error("Could not set CSRF token");
   }
+
+  const data = await response.json();
+  csrfToken = data.csrfToken;
+
+  return csrfToken;
 }
 
 export async function apiFetch(path, options = {}) {
   const method = (options.method || "GET").toUpperCase();
   const isUnsafeMethod = !["GET", "HEAD", "OPTIONS"].includes(method);
-
-  if (isUnsafeMethod) {
-    await ensureCsrfCookie();
-  }
 
   const headers = {
     "Content-Type": "application/json",
@@ -39,7 +36,7 @@ export async function apiFetch(path, options = {}) {
   };
 
   if (isUnsafeMethod) {
-    headers["X-CSRFToken"] = getCookie("csrftoken") || "";
+    headers["X-CSRFToken"] = await ensureCsrfToken();
   }
 
   const response = await fetch(apiUrl(path), {

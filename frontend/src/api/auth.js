@@ -1,32 +1,29 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
+let csrfToken = null;
+
 function apiUrl(path) {
   return `${API_BASE_URL}${path}`;
 }
 
-function getCookie(name) {
-  const cookies = document.cookie ? document.cookie.split("; ") : [];
-
-  for (const cookie of cookies) {
-    const [key, value] = cookie.split("=");
-
-    if (key === name) {
-      return decodeURIComponent(value);
-    }
+async function ensureCsrfToken() {
+  if (csrfToken) {
+    return csrfToken;
   }
 
-  return null;
-}
-
-async function ensureCsrfCookie() {
   const response = await fetch(apiUrl("/api/auth/csrf/"), {
     method: "GET",
     credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error("Could not set CSRF cookie");
+    throw new Error("Could not set CSRF token");
   }
+
+  const data = await response.json();
+  csrfToken = data.csrfToken;
+
+  return csrfToken;
 }
 
 export async function getCurrentUser() {
@@ -44,14 +41,14 @@ export async function getCurrentUser() {
 }
 
 export async function loginUser({ username, password }) {
-  await ensureCsrfCookie();
+  const token = await ensureCsrfToken();
 
   const response = await fetch(apiUrl("/api/auth/login/"), {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCookie("csrftoken"),
+      "X-CSRFToken": token,
     },
     body: JSON.stringify({ username, password }),
   });
@@ -66,14 +63,14 @@ export async function loginUser({ username, password }) {
 }
 
 export async function signupUser({ username, email, password }) {
-  await ensureCsrfCookie();
+  const token = await ensureCsrfToken();
 
   const response = await fetch(apiUrl("/api/auth/signup/"), {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      "X-CSRFToken": getCookie("csrftoken"),
+      "X-CSRFToken": token,
     },
     body: JSON.stringify({ username, email, password }),
   });
@@ -88,17 +85,19 @@ export async function signupUser({ username, email, password }) {
 }
 
 export async function logoutUser() {
-  await ensureCsrfCookie();
+  const token = await ensureCsrfToken();
 
   const response = await fetch(apiUrl("/api/auth/logout/"), {
     method: "POST",
     credentials: "include",
     headers: {
-      "X-CSRFToken": getCookie("csrftoken"),
+      "X-CSRFToken": token,
     },
   });
 
   if (!response.ok) {
     throw new Error("Logout failed");
   }
+
+  csrfToken = null;
 }
