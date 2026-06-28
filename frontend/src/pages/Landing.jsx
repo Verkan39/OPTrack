@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowRight, BarChart3, Briefcase, CheckCircle2, Layers } from "lucide-react";
+import { ArrowRight, BarChart3, Briefcase, Layers } from "lucide-react";
 
 function LandingPage() {
   return (

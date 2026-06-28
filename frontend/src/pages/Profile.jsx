@@ -45,7 +45,7 @@ function ProfilePage() {
     try {
       await updateProfile(formData);
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       setFormError("Could not save profile. Please try again.");
     }
   }

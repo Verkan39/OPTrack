@@ -1,4 +1,4 @@
-import { Bell, History, Search, User, LogOut } from "lucide-react";
+import { History, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -10,24 +10,12 @@ function Topbar() {
   const { logout } = useAuth();
 
   const {
-    searchQuery,
-    setSearchQuery,
-    notifications,
-    markNotificationsRead,
     profile,
   } = useAppData();
 
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut]= useState(false);
-  const unreadCount = notifications.filter((item) => item.unread).length;
   const profileInitial = profile.name?.charAt(0).toUpperCase() || "U";
-
-  function toggleNotifications() {
-    setIsNotificationsOpen((prev) => !prev);
-    setIsProfileOpen(false);
-    markNotificationsRead();
-  }
 
   function toggleProfile() {
     setIsProfileOpen((prev) => !prev);

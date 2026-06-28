@@ -8,16 +8,13 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
 import { useAppData } from "../context/AppDataContext";
 
 function SettingsPage() {
   const { profile, applications, isLoadingProfile, apiError } = useAppData();
 
-  const [emailAlerts, setEmailAlerts] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(false);
-  const [compactCards, setCompactCards] = useState(false);
 
   const profileInitial = useMemo(() => {
     const name = profile?.name || "User";
@@ -209,31 +206,6 @@ function InfoRow({ label, value }) {
   );
 }
 
-function ToggleRow({ title, description, enabled, onChange }) {
-  return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900 p-4">
-      <div>
-        <p className="font-bold text-slate-100">{title}</p>
-        <p className="mt-1 text-sm text-slate-400">{description}</p>
-      </div>
-
-      <button
-        type="button"
-        onClick={onChange}
-        aria-pressed={enabled}
-        className={`relative h-7 w-12 shrink-0 rounded-full transition ${
-          enabled ? "bg-blue-600" : "bg-slate-700"
-        }`}
-      >
-        <span
-          className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${
-            enabled ? "left-6" : "left-1"
-          }`}
-        />
-      </button>
-    </div>
-  );
-}
 
 function SafetyItem({ icon: Icon, title, description }) {
   return (
