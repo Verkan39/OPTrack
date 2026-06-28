@@ -4,6 +4,9 @@ OPTrack is a full-stack internship and job application tracker built for student
 
 **Live App:** https://op-track-vert.vercel.app/
 
+[![Installation Guide](https://img.shields.io/badge/Installation%20Guide-Open-blue?style=for-the-badge)](INSTALLATION.md)
+
+
 ## Motivation
 
 Applying across multiple platforms can quickly become difficult to manage. OPTrack was built to solve that problem by giving students a simple, focused, and production-ready tool to track every opportunity, deadline, status, and note in one place.
