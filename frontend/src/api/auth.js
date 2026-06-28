@@ -1,3 +1,9 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
+function apiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
+
 function getCookie(name) {
   const cookies = document.cookie ? document.cookie.split("; ") : [];
 
@@ -13,7 +19,7 @@ function getCookie(name) {
 }
 
 async function ensureCsrfCookie() {
-  const response = await fetch("/api/auth/csrf/", {
+  const response = await fetch(apiUrl("/api/auth/csrf/"), {
     method: "GET",
     credentials: "include",
   });
@@ -24,7 +30,7 @@ async function ensureCsrfCookie() {
 }
 
 export async function getCurrentUser() {
-  const response = await fetch("/api/auth/me/", {
+  const response = await fetch(apiUrl("/api/auth/me/"), {
     method: "GET",
     credentials: "include",
   });
@@ -40,7 +46,7 @@ export async function getCurrentUser() {
 export async function loginUser({ username, password }) {
   await ensureCsrfCookie();
 
-  const response = await fetch("/api/auth/login/", {
+  const response = await fetch(apiUrl("/api/auth/login/"), {
     method: "POST",
     credentials: "include",
     headers: {
@@ -62,7 +68,7 @@ export async function loginUser({ username, password }) {
 export async function signupUser({ username, email, password }) {
   await ensureCsrfCookie();
 
-  const response = await fetch("/api/auth/signup/", {
+  const response = await fetch(apiUrl("/api/auth/signup/"), {
     method: "POST",
     credentials: "include",
     headers: {
@@ -84,7 +90,7 @@ export async function signupUser({ username, email, password }) {
 export async function logoutUser() {
   await ensureCsrfCookie();
 
-  const response = await fetch("/api/auth/logout/", {
+  const response = await fetch(apiUrl("/api/auth/logout/"), {
     method: "POST",
     credentials: "include",
     headers: {

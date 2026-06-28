@@ -1,3 +1,9 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+
+function apiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
+
 function getCookie(name) {
   const cookies = document.cookie ? document.cookie.split("; ") : [];
   const cookie = cookies.find((row) => row.startsWith(`${name}=`));
@@ -10,7 +16,7 @@ async function ensureCsrfCookie() {
     return;
   }
 
-  const response = await fetch("/api/csrf/", {
+  const response = await fetch(apiUrl("/api/csrf/"), {
     credentials: "include",
   });
 
@@ -36,7 +42,7 @@ export async function apiFetch(path, options = {}) {
     headers["X-CSRFToken"] = getCookie("csrftoken") || "";
   }
 
-  const response = await fetch(path, {
+  const response = await fetch(apiUrl(path), {
     ...options,
     method,
     credentials: "include",
