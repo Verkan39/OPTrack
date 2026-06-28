@@ -82,18 +82,6 @@ function Topbar() {
           </button>
 
           <button
-            onClick={toggleNotifications}
-            className="relative text-slate-300 hover:text-white"
-          >
-            <Bell size={20} />
-            {unreadCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">
-                {unreadCount}
-              </span>
-            )}
-          </button>
-
-          <button
             onClick={toggleProfile}
             className="flex items-center gap-3 border-l border-slate-700 pl-5"
           >
@@ -110,34 +98,6 @@ function Topbar() {
           </button>
 
           <AnimatePresence>
-            {isNotificationsOpen && (
-              <motion.div
-                className="absolute right-20 top-12 w-80 rounded-xl border border-slate-700 bg-slate-900 p-4 shadow-2xl shadow-black/40"
-                initial={{ opacity: 0, y: -8, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.96 }}
-              >
-                <h3 className="mb-3 font-bold text-slate-100">
-                  Notifications
-                </h3>
-
-                <div className="space-y-3">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className="rounded-lg border border-slate-700 bg-slate-950 p-3"
-                    >
-                      <p className="font-semibold text-slate-100">
-                        {notification.title}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-400">
-                        {notification.message}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
 
             {isProfileOpen && (
               <motion.div
@@ -179,7 +139,7 @@ function Topbar() {
           </p>
 
           <p className="mt-1 text-xs text-slate-400">
-            Taking you back to InternTrack
+            Taking you back to OPTrack
           </p>
         </div>
       </div>

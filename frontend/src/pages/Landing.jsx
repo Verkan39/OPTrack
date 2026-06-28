@@ -6,7 +6,7 @@ function LandingPage() {
     <div className="min-h-screen bg-[#050b18] text-slate-100">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/" className="text-2xl font-bold tracking-tight">
-          InternTrack
+          OPTrack
         </Link>
 
         <div className="flex items-center gap-3">
@@ -34,11 +34,11 @@ function LandingPage() {
             </p>
 
             <h1 className="mt-5 text-5xl font-bold leading-tight tracking-tight text-white md:text-6xl">
-              Track every internship application in one clean dashboard.
+              Track every application in one clean dashboard.
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-              InternTrack helps students manage applications across LinkedIn,
+              OPTrack helps students manage applications across LinkedIn,
               WellFound, Internshala, company websites, referrals and more.
               Keep track of deadlines, interviews, offers, notes and follow-ups
               without losing context.

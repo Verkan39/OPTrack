@@ -51,7 +51,7 @@ function SignupPage() {
     <div className="min-h-screen bg-[#050b18] text-slate-100">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/" className="text-2xl font-bold tracking-tight">
-          InternTrack
+          OPTrack
         </Link>
 
         <Link

@@ -75,7 +75,7 @@ class UserProfile(models.Model):
     )
 
     name = models.CharField(max_length=120, blank=True)
-    headline = models.CharField(max_length=120, default="Job Seeker Pro")
+    headline = models.CharField(max_length=120, default="Student")
     email = models.EmailField(blank=True)
     location = models.CharField(max_length=120, blank=True)
     target_role = models.CharField(max_length=150, blank=True)

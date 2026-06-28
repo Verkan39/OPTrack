@@ -85,9 +85,7 @@ function Dashboard() {
           </h2>
 
           <p className="mt-2 max-w-2xl text-slate-300">
-            Your application pipeline is connected to Django. Track active
-            applications, interviews, offers, and recent opportunities from one
-            place.
+            Track all your applications at one place.
           </p>
         </div>
 
@@ -134,7 +132,7 @@ function Dashboard() {
               icon={Send}
               label="Applications Sent"
               value={String(totalApplications).padStart(2, "0")}
-              pill="total"
+              pill=""
               tone="blue"
             />
 
@@ -142,7 +140,7 @@ function Dashboard() {
               icon={CalendarDays}
               label="Interviews"
               value={String(interviewCount).padStart(2, "0")}
-              pill={interviewCount > 0 ? "active" : "none yet"}
+              pill=""
               tone="cyan"
             />
 
@@ -150,7 +148,7 @@ function Dashboard() {
               icon={Award}
               label="Offers Received"
               value={String(offerCount).padStart(2, "0")}
-              pill={offerCount > 0 ? "strong" : "keep applying"}
+              pill=""
               tone="pink"
             />
 

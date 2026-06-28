@@ -43,7 +43,7 @@ function LoginPage() {
     <div className="min-h-screen bg-[#050b18] text-slate-100">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <Link to="/" className="text-2xl font-bold tracking-tight">
-          InternTrack
+          OPTrack
         </Link>
 
         <Link
@@ -67,7 +67,7 @@ function LoginPage() {
 
           <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
             Login to track applications, update statuses, manage deadlines,
-            save notes, and monitor your internship progress from one dashboard.
+            save notes, and monitor your application progress from one dashboard.
           </p>
 
           <div className="mt-10 grid max-w-xl gap-4 sm:grid-cols-2">
@@ -154,7 +154,7 @@ function LoginPage() {
             </form>
 
             <p className="mt-6 text-center text-sm text-slate-400">
-              New to InternTrack?{" "}
+              New to OPTrack?{" "}
               <Link
                 to="/signup"
                 className="font-semibold text-blue-300 hover:text-blue-200 hover:underline"

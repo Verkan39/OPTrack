@@ -10,6 +10,7 @@ import ProfilePage from "./pages/Profile";
 import LoginPage from "./pages/Login";
 import SignupPage from "./pages/SignUp";
 import LandingPage from "./pages/Landing";
+import Support from "./pages/Support";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AppDataProvider } from "./context/AppDataContext";
@@ -35,6 +36,7 @@ function App() {
           <Route path="/applications/:id" element={<ApplicationDetailPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/support" element={<Support />} />
         </Route>
       </Route>
 

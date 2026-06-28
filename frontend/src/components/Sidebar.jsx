@@ -30,7 +30,7 @@ function Sidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-72 shrink-0 flex-col border-r border-slate-700/70 bg-[#030816]">
       <div className="px-6 py-7">
-        <h1 className="text-2xl font-bold text-blue-100">InternTrack</h1>
+        <h1 className="text-2xl font-bold text-blue-100">OPTrack</h1>
         <p className="font-mono text-xs uppercase tracking-[0.25em] text-slate-300">
           Application Manager
         </p>
@@ -67,10 +67,12 @@ function Sidebar() {
             Settings
           </NavLink>
 
-          <button className="flex w-full items-center gap-3 rounded-md px-4 py-3 font-mono text-sm font-semibold text-slate-300 hover:bg-slate-800">
+          <NavLink 
+           to="/support"
+           className="flex w-full items-center gap-3 rounded-md px-4 py-3 font-mono text-sm font-semibold text-slate-300 hover:bg-slate-800">
             <CircleHelp size={18} />
             Support
-          </button>
+          </NavLink>
         </div>
       </div>
     </aside>

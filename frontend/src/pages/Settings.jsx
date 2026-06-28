@@ -46,7 +46,7 @@ function SettingsPage() {
 
           <p className="mt-2 max-w-2xl text-slate-300">
             Manage your account overview, tracker preferences, and data safety
-            information for InternTrack.
+            information for OPTrack.
           </p>
         </div>
 
@@ -66,18 +66,15 @@ function SettingsPage() {
 
       <section className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl shadow-black/20">
-          <div className="flex items-start gap-4">
+          <div className="flex align-middle gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-400/40 bg-blue-500/10 text-blue-200">
               <UserRound size={26} />
             </div>
 
             <div>
-              <h3 className="text-2xl font-bold text-slate-100">
+              <h3 className="text-2xl font-bold text-slate-100 items-center justify-center">
                 Account Overview
               </h3>
-              <p className="mt-1 text-sm text-slate-400">
-                This information comes from your Django profile API.
-              </p>
             </div>
           </div>
 
@@ -107,7 +104,7 @@ function SettingsPage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl shadow-black/20">
+          {/* <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl shadow-black/20">
             <div className="flex items-center gap-3">
               <Bell className="text-blue-300" size={22} />
               <h3 className="text-xl font-bold text-slate-100">
@@ -142,7 +139,7 @@ function SettingsPage() {
                 onChange={() => setCompactCards((prev) => !prev)}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 shadow-2xl shadow-black/20">
             <div className="flex items-center gap-3">
@@ -156,13 +153,13 @@ function SettingsPage() {
               <SafetyItem
                 icon={Lock}
                 title="Session based authentication"
-                description="React talks to Django APIs using Django session auth."
+                description="Your data is safe with our robust tech stack."
               />
 
               <SafetyItem
                 icon={Database}
                 title="Private database layer"
-                description="Supabase is used only as PostgreSQL behind Django."
+                description="The database is being accessed by backend making it secure"
               />
 
               <SafetyItem
@@ -179,22 +176,22 @@ function SettingsPage() {
         <ActionCard
           icon={FileText}
           title="Export data"
-          description="CSV/PDF export can be added after the core MVP is deployed."
+          description="CSV/PDF export feature will soon be added."
           tag="Coming soon"
         />
 
         <ActionCard
           icon={MonitorCog}
           title="Appearance"
-          description="Theme and layout controls can be persisted later."
-          tag="MVP later"
+          description="Theme and layout controls will be persisted later."
+          tag="Coming Soon"
         />
 
         <ActionCard
           icon={Bell}
           title="Smart reminders"
-          description="Follow-up reminders can be generated from application deadlines."
-          tag="Planned"
+          description="Follow-up reminders will be generated from application deadlines."
+          tag="Coming Soon"
         />
       </section>
     </div>

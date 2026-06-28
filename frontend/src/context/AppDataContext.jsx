@@ -1,15 +1,14 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getApplications, createApplication, updateApplicationStatusApi, updateApplication, deleteApplicationApi } from "../api/applications";
 import { getProfile, updateProfileApi } from "../api/profile";
-import { mockApplications } from "../data/mockApplications";
 
 const AppDataContext = createContext(null);
 
 const fallbackProfile = {
-  name: "Vedanshu",
-  headline: "Job Seeker Pro",
-  email: "vedanshu@example.com",
-  location: "IIT Roorkee",
+  name: "user",
+  headline: "Student",
+  email: "user@gmail.com",
+  location: "India",
   targetRole: "Software Development Intern",
   preferredPlatforms: "LinkedIn, WellFound, Internshala",
   bio: "Tracking internship applications, referrals, interviews, and follow-ups in one place.",
@@ -57,11 +56,6 @@ export function AppDataProvider({ children }) {
       } catch (error) {
         console.error(error);
 
-        setApiError(
-          "Could not load data from Django API. Showing mock fallback data."
-        );
-
-        setApplications(mockApplications);
         setProfile(fallbackProfile);
       } finally {
         setIsLoadingApplications(false);
